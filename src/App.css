@@ -10,9 +10,11 @@
   will-change: filter;
   transition: filter 300ms;
 }
+
 .logo:hover {
   filter: drop-shadow(0 0 2em #646cffaa);
 }
+
 .logo.react:hover {
   filter: drop-shadow(0 0 2em #61dafbaa);
 }
@@ -21,6 +23,7 @@
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }
@@ -36,7 +39,7 @@
   border: 1px solid #494949;
   padding: 15px;
   border-radius: 5px;
-  background-color: rgb(42, 42, 42);
+  background-color: rgba(0, 152, 234, 0.12);
   margin: 15px 0px;
 }
 
