@@ -68,7 +68,7 @@ export class MainContract implements Contract {
 
   // new геттер баланса
   async getBalance(provider: ContractProvider): Promise<bigint> {
-    const { stack } = await provider.get('get_contract_balance', []);
+    const { stack } = await provider.get('get_balance_info', []);
     return stack.readBigNumber(); // Используем readBigNumber для баланса
   }
 
