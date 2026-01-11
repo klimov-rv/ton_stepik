@@ -1,10 +1,11 @@
-import "./App.css";
-import { TonConnectButton } from "@tonconnect/ui-react";
-import { useMainContract } from "./hooks/useMainContract";
-import { useTonConnect } from "./hooks/useTonConnect";
-import { fromNano } from "ton-core";
-import { useCallback, useEffect, useState } from "react";
-import WebApp from "@twa-dev/sdk";
+import './App.css';
+import { TonConnectButton } from '@tonconnect/ui-react';
+import { useMainContract } from './hooks/useMainContract';
+import { useTonConnect } from './hooks/useTonConnect';
+import { fromNano } from 'ton-core';
+import { useCallback, useEffect, useState } from 'react';
+import WebApp from '@twa-dev/sdk';
+import { CONTRACT_ADDRESS } from './config';
 
 function App() {
   const {
@@ -23,9 +24,13 @@ function App() {
   const [connected, setConnected] = useState<boolean>(false);
   const [platform, setPlatform] = useState<string | null>(null);
   const [code, setCode] = useState<string | null>(null);
+  const format = {
+    bounceable: false,
+    testOnly: true,
+  };
 
   const userPlatform = useCallback(() => {
-    setPlatform(WebApp.platform === "unknown" ? null : WebApp.platform);
+    setPlatform(WebApp.platform === 'unknown' ? null : WebApp.platform);
   }, []);
 
   const showPlatformInAlert = useCallback(() => {
@@ -35,15 +40,15 @@ function App() {
   }, [platform]);
 
   const softHaptic = useCallback(() => {
-    WebApp.HapticFeedback.impactOccurred("soft");
+    WebApp.HapticFeedback.impactOccurred('soft');
   }, []);
 
   const successHaptic = useCallback(() => {
-    WebApp.HapticFeedback.notificationOccurred("success");
+    WebApp.HapticFeedback.notificationOccurred('success');
   }, []);
 
   const openScan = useCallback(() => {
-    WebApp.showScanQrPopup({ text: "Scan some QR code" }, (code) => {
+    WebApp.showScanQrPopup({ text: 'Scan some QR code' }, (code) => {
       setCode(code);
       WebApp.closeScanQrPopup();
     });
@@ -52,6 +57,7 @@ function App() {
   useEffect(() => {
     WebApp.expand();
     userPlatform();
+
     setConnected(tonConnectUI.connected);
 
     tonConnectUI.onStatusChange((status) => {
@@ -71,9 +77,9 @@ function App() {
           <p>{contract_address}</p>
           <hr />
           <b>Our contract Owner:</b>
-          <p>{owner_address?.toString()}</p>
+          <p>{owner_address?.toString(format)}</p>
           <hr />
-          {contract_balance && (
+          {contract_balance !== null && (
             <>
               <b>Our contract Balance:</b>
               <p>{fromNano(contract_balance)}</p>
@@ -83,13 +89,13 @@ function App() {
           {recent_sender && (
             <>
               <b>Recent sender:</b>
-              <p>{recent_sender.toString()}</p>
+              <p>{recent_sender.toString(format)}</p>
               <hr />
             </>
           )}
           <div>
             <b>Counter Value:</b>
-            <p>{counter_value ?? "Loading..."}</p>
+            <p>{counter_value ?? 'Loading...'}</p>
             <hr />
           </div>
         </div>
@@ -156,14 +162,11 @@ function App() {
           )}
         </div>
         <div>
-          <a
-            href="https://testnet.tonscan.org/address/EQDAbnsqALKAoQO5uS1qOI8X7OhkeDnv3hZiqg2VAqhPa6xN"
-            target="_blank"
-          >
+          <a href={`https://testnet.tonscan.org/address/${CONTRACT_ADDRESS}`} target="_blank">
             explorer
           </a>
           <br />
-          <a href="https://github.com/evilcore29/ton_stepik_fe/" target="_blank">
+          <a href="https://github.com/klimov-rv/ton_stepik" target="_blank">
             github
           </a>
           <div>{platform}</div>

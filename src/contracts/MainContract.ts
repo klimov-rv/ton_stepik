@@ -7,48 +7,42 @@ import {
   ContractProvider,
   Sender,
   SendMode,
-} from "ton-core";
+} from 'ton-core'; // Стоит обновиться до '@ton/core', а не 'ton-core'
 
-export type MainContractConfig = {
-  number: number;
-  address: Address;
-  owner_address: Address;
+export type GoGoTonConfig = {
+  counter: number;
+  recentSender: Address;
+  owner: Address;
 };
 
-export function mainContractConfigToCell(config: MainContractConfig): Cell {
+export function GoGoTonConfigToCell(config: GoGoTonConfig): Cell {
   return beginCell()
-    .storeUint(config.number, 32)
-    .storeAddress(config.address)
-    .storeAddress(config.owner_address)
+    .storeUint(config.counter, 32)
+    .storeAddress(config.recentSender)
+    .storeAddress(config.owner)
     .endCell();
 }
 
-// для того чтобы работать с восстановленным контрактом для его тестирования, рекомендуется писать обертки
-// для написания обертки по доке Sandbox нужно использовать интерфейс Contract из @ton/core
 export class MainContract implements Contract {
   constructor(
     readonly address: Address,
-    readonly init?: { code: Cell; data: Cell }
+    readonly init?: { code: Cell; data: Cell },
   ) {}
 
-  static createFromConfig(
-    config: MainContractConfig,
-    code: Cell,
-    workchain = 0
-  ) {
-    const data = mainContractConfigToCell(config);
+  static createFromConfig(config: GoGoTonConfig, code: Cell, workchain = 0) {
+    const data = GoGoTonConfigToCell(config);
     const init = { code, data };
     const address = contractAddress(workchain, init);
 
     return new MainContract(address, init);
   }
 
-  // отправляет внутренее сообщение
+  // отправляет внутреннее сообщение
   async sendIncrement(
     provider: ContractProvider,
     sender: Sender,
     value: bigint,
-    increment_by: number
+    increment_by: number,
   ) {
     const msg_body = beginCell()
       .storeUint(1, 32) // OP code
@@ -64,7 +58,7 @@ export class MainContract implements Contract {
 
   // геттер который возвращает адрес из c4 хранилища
   async getData(provider: ContractProvider) {
-    const { stack } = await provider.get("get_contract_storage_data", []);
+    const { stack } = await provider.get('get_contract_storage_data', []);
     return {
       number: stack.readNumber(),
       recent_sender: stack.readAddress(),
@@ -72,10 +66,10 @@ export class MainContract implements Contract {
     };
   }
 
-  async getBalance(provider: ContractProvider) {
-    const { stack } = await provider.get("balance", []);
-
-    return stack.readNumber();
+  // new геттер баланса
+  async getBalance(provider: ContractProvider): Promise<bigint> {
+    const { stack } = await provider.get('get_contract_balance', []);
+    return stack.readBigNumber(); // Используем readBigNumber для баланса
   }
 
   async sendDeposit(provider: ContractProvider, sender: Sender, value: bigint) {
@@ -94,7 +88,7 @@ export class MainContract implements Contract {
   async sendNoCodeDeposit(
     provider: ContractProvider,
     sender: Sender,
-    value: bigint
+    value: bigint,
   ) {
     const msg_body = beginCell().endCell();
 
@@ -109,7 +103,7 @@ export class MainContract implements Contract {
     provider: ContractProvider,
     sender: Sender,
     value: bigint,
-    amount: bigint
+    amount: bigint,
   ) {
     const msg_body = beginCell()
       .storeUint(3, 32) // OP code
@@ -129,5 +123,16 @@ export class MainContract implements Contract {
       sendMode: SendMode.PAY_GAS_SEPARATELY,
       body: beginCell().endCell(),
     });
+  }
+
+  // Дополнительные геттеры для полной информации
+  async getFullContractInfo(provider: ContractProvider) {
+    const { stack } = await provider.get('get_full_contract_info', []);
+    return {
+      balance: stack.readBigNumber(),
+      number: stack.readNumber(),
+      recent_sender: stack.readAddress(),
+      owner_address: stack.readAddress(),
+    };
   }
 }

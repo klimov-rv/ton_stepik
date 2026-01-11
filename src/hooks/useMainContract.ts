@@ -4,6 +4,7 @@ import { useTonClient } from "./useTonClient";
 import { useAsyncInitialize } from "./useAsyncInitialize";
 import { Address, OpenedContract, toNano } from "ton-core";
 import { useTonConnect } from "./useTonConnect";
+import { CONTRACT_ADDRESS } from '../config';
 
 export function useMainContract() {
   const client = useTonClient();
@@ -15,11 +16,11 @@ export function useMainContract() {
     owner_address: Address;
   }>();
 
-  const [balance, setBalance] = useState<null | number>(0);
+  const [balance, setBalance] = useState<null | bigint>(null);
 
   const mainContract = useAsyncInitialize(async () => {
     if (!client) return;
-    const parsedAddress = Address.parse("EQDAbnsqALKAoQO5uS1qOI8X7OhkeDnv3hZiqg2VAqhPa6xN");
+    const parsedAddress = Address.parse(CONTRACT_ADDRESS);
 
     const contract = new MainContract(parsedAddress);
     return client.open(contract) as OpenedContract<MainContract>;
