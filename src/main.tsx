@@ -3,7 +3,7 @@ import App from './App';
 import './index.css';
 import { TonConnectUIProvider } from '@tonconnect/ui-react';
 
-const manifestUrl = 'https://klimovproject.online/manifest.json';
+const manifestUrl = 'https://klimovproject.online/ton_stepik/manifest.json';
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <TonConnectUIProvider manifestUrl={manifestUrl}>
